@@ -1,56 +1,112 @@
-import { View, TextInput, StyleSheet } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
+import { useState } from 'react';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Alert,
+  useWindowDimensions,
+  KeyboardAvoidingView,
+  ScrollView,
+} from 'react-native';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import Colors from '../constants/colors';
+import Title from '../components/ui/Title';
+import Card from '../components/ui/Card';
+import InstructionText from '../components/ui/InstructionText';
 
-function StartGameScreen() {
+function StartGameScreen({ onPickNumber }) {
+  const [enteredNumber, setEnteredNumber] = useState('');
+
+  /**
+   * 디바이스의 가로, 세로 구하기
+   */
+  const { width, height } = useWindowDimensions();
+
+  /**
+   * 텍스트입력에 따른 상태 저장
+   */
+  function numberInputHandler(enteredText) {
+    setEnteredNumber(enteredText);
+  }
+
+  /**
+   * 입력값 초기화
+   */
+  function resetInputHandler() {
+    setEnteredNumber('');
+  }
+
+  /**
+   * 숫자 입력후 확인
+   */
+  function confirmInputHandler() {
+    const chosenNumber = parseInt(enteredNumber);
+
+    if (isNaN(chosenNumber) || chosenNumber <= 0 || chosenNumber > 99) {
+      Alert.alert('오류!', '1~99 사이의 숫자를 입;력해주십시오.', [
+        { text: '확인', style: 'default', onPress: resetInputHandler },
+      ]);
+      return;
+    }
+
+    onPickNumber(chosenNumber);
+  }
+
+  const marginTopDistance = height < 400 ? 30 : 100;
+
   return (
-    <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.numberInput}
-        maxLength={2}
-        keyboardType="number-pad"
-        autoCapitalize="none" // 자동 대문자 변환 끄기
-        autoCorrect={false} // 자동 수정 끄기
-      />
-      <View style={styles.buttonsContainer}>
-        <View style={styles.buttonContainer}>
-          <PrimaryButton>Reset</PrimaryButton>
+    <ScrollView style={styles.screen}>
+      <KeyboardAvoidingView style={styles.screen} behavior="position">
+        <View style={[styles.rootContainer, { marginTop: marginTopDistance }]}>
+          <Title>Guess My Number</Title>
+          <Card>
+            <InstructionText>Enter a Number</InstructionText>
+            <TextInput
+              style={styles.numberInput}
+              maxLength={2}
+              keyboardType="number-pad"
+              autoCapitalize="none" // 자동 대문자 변환 끄기
+              autoCorrect={false} // 자동 수정 끄기
+              value={enteredNumber}
+              onChangeText={numberInputHandler}
+            />
+            <View style={styles.buttonsContainer}>
+              <View style={styles.buttonContainer}>
+                <PrimaryButton onPress={resetInputHandler}>Reset</PrimaryButton>
+              </View>
+              <View style={styles.buttonContainer}>
+                <PrimaryButton onPress={confirmInputHandler}>
+                  Confirm
+                </PrimaryButton>
+              </View>
+            </View>
+          </Card>
         </View>
-        <View style={styles.buttonContainer}>
-          <PrimaryButton>Confirm</PrimaryButton>
-        </View>
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 export default StartGameScreen;
 
+// const diviceHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
-  inputContainer: {
-    justifyContent: 'center', // 세로정렬
-    alignItems: 'center', // 가로 정렬
-    marginTop: 100,
-    marginHorizontal: 24,
-    padding: 16,
-    backgroundColor: '#3b021f',
-    borderRadius: 8,
-    elevation: 4, // 안드로이드 전용 그림자 효과
-    shadowColor: 'black', // 아이폰 전용 그림자 색
-    shadowOffset: {
-      // 아이폰 전용 그림자 가로 세로 크기설정
-      width: 10,
-      height: 10,
-    },
-    shadowRadius: 6, // 아이폰 전용 그림자가 얼마나 번지는지 (선명도)
-    shadowOpacity: 1, // 아이폰 전용 그림자 투명도
+  screen: {
+    flex: 1,
+  },
+  rootContainer: {
+    flex: 1,
+    // marginTop: diviceHeight < 400 ? 30 : 100,
+    alignItems: 'center',
   },
   numberInput: {
     height: 50,
     width: 50,
     fontSize: 32,
-    borderBottomColor: '#ddb52f',
+    borderBottomColor: Colors.accent500,
     borderBottomWidth: 2,
-    color: '#ddb52f',
+    color: Colors.accent500,
     marginVertical: 8,
     fontWeight: 'bold',
     textAlign: 'center',
